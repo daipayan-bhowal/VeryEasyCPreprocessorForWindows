@@ -2676,6 +2676,8 @@ void start_cpp_driver(string_t src_file)
 	lexer(OriginalFilecontent);
 	parser(ExpandedHeaderContent, OriginalFilecontent, src_file);
 	ExpandedHeaderContent = concat(ExpandedHeaderContent, OriginalFilecontent);
+	RemoveAllExtraEmptyLines(ExpandedHeaderContent);
+	RemoveAllExtraNewLines(ExpandedHeaderContent);
 	outputFilename = ChangeFileFormat(src_file, ".i");
 	tape_write(outputFilename->str, ExpandedHeaderContent->str, ExpandedHeaderContent->len);
 	string_destroy(OriginalFilecontent);
