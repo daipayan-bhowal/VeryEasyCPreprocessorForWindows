@@ -230,10 +230,9 @@ string_t overwrite(string_t a, string_t b)
 
 string_t getlineByPos(string_t a, int start_pos)
 {
-	int i,j,k = 0;
+	int i,j,k= 0;
 	//string_t ret = NULL;
 	char* s = NULL;
-
 	while (a->str[k + start_pos] != '\n' && a->str[k + start_pos] != '\0' && a->str[k + start_pos] != EOF)
 	{
 		  k++;
@@ -245,11 +244,41 @@ string_t getlineByPos(string_t a, int start_pos)
 	s = (char*)calloc(k + 1, sizeof(char));
 	if (a->str[k + start_pos] == '\n' || a->str[k + start_pos] == '\0' || a->str[k + start_pos] == EOF)
 	{
-		for (i = 0, j = start_pos; i < k; i++, j++)
+		for (i=0,j = start_pos; i < k; i++, j++)
 		{
 			s[i] = a->str[j];
 		}
 		s[k] = '\0';
+		//printf("The string is %s and len is %d\n", s, k);
+		string_t ret = string_unalloc(s);
+		return ret;
+	}
+	return NULL;
+}
+
+string_t getWholeLineByPos(string_t a, int start_pos)
+{
+	int i, j, k = 0, b=0;
+	//string_t ret = NULL;
+	char* s = NULL;
+	while (start_pos - b >= 0 && a->str[start_pos- b] != '\n')
+	{
+		b++;
+	}
+	while (a->str[k + start_pos] != '\n' && a->str[k + start_pos] != '\0' && a->str[k + start_pos] != EOF)
+	{
+		k++;
+	}
+
+
+	s = (char*)calloc(b + k + 1, sizeof(char));
+	if (a->str[k + start_pos] == '\n' || a->str[k + start_pos] == '\0' || a->str[k + start_pos] == EOF)
+	{
+		for (i = 0, j = start_pos - b +1; i < k+b; i++, j++)
+		{
+			s[i] = a->str[j];
+		}
+		s[i] = '\0';
 		//printf("The string is %s and len is %d\n", s, k);
 		string_t ret = string_unalloc(s);
 		return ret;
@@ -1021,6 +1050,7 @@ string_t tokenizeUsingOffset(string_t str, int* offset)
 		str->str[i] == '!' ||
 		str->str[i] == '=' ||
 		str->str[i] == '{' ||
+		str->str[i] == '\\' ||
 		str->str[i] == '}'
 		)
 	{

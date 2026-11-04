@@ -1390,7 +1390,7 @@ void StringReplacer(string_t expandedFileContent, string_t OriginalFilecontent) 
 	char buff[100] = { 0 };
 	int isRemoved = 0;
 	int offset = 0, ln=0, tok_pos =0, word_offset = 0;
-	string_t bracket_fetch= NULL, args_fetch = NULL, word = NULL;
+	string_t bracket_fetch= NULL, args_fetch = NULL, word = NULL, line_str=NULL;
 	bool_t func_found = False;
 
 	while ((loc = findCharNext(expandedFileContent, '#', &loc)) != -1)
@@ -1550,6 +1550,21 @@ void StringReplacer(string_t expandedFileContent, string_t OriginalFilecontent) 
 		
 		while ((tok_pos = findStringPos(OriginalFilecontent, symbol_to_be_replaced, tok_pos)) != -1)
 		{
+			line_str = getWholeLineByPos(OriginalFilecontent, tok_pos);
+			string_t preprocessor_directive = tokenizeUsingOffset(line_str, &offset);
+			offset = 0;
+			if (strncmp(preprocessor_directive->str, "#define", 6) == 0 ||
+				strncmp(preprocessor_directive->str, "#if",3) == 0 ||
+				strncmp(preprocessor_directive->str, "#ifdef",6) == 0 ||
+				strncmp(preprocessor_directive->str, "#ifndef", 7) == 0 ||
+				strncmp(preprocessor_directive->str, "#endif", 6) == 0 ||
+				strncmp(preprocessor_directive->str, "#elif", 5) == 0 ||
+				strncmp(preprocessor_directive->str, "#else", 5) == 0 ||
+				strncmp(preprocessor_directive->str, "#if", 3) == 0 )
+			{
+				tok_pos+= line_str->len;
+				continue;
+			}
 			if ((tok_pos - 1) > Defvar[i].def_pos)
 			{
 				delete_str(OriginalFilecontent, tok_pos-1, tok_pos + symbol_to_be_replaced->len-1);
@@ -1572,6 +1587,22 @@ void StringReplacer(string_t expandedFileContent, string_t OriginalFilecontent) 
 
 		while ((tok_pos = findStringPos(OriginalFilecontent, symbol_to_be_replaced, tok_pos)) != -1)
 		{
+			line_str = getWholeLineByPos(OriginalFilecontent, tok_pos);
+			string_t preprocessor_directive = tokenizeUsingOffset(line_str, &offset);
+			offset = 0;
+			if (strncmp(preprocessor_directive->str, "#define", 6) == 0 ||
+				strncmp(preprocessor_directive->str, "#if", 3) == 0 ||
+				strncmp(preprocessor_directive->str, "#ifdef", 6) == 0 ||
+				strncmp(preprocessor_directive->str, "#ifndef", 7) == 0 ||
+				strncmp(preprocessor_directive->str, "#endif", 6) == 0 ||
+				strncmp(preprocessor_directive->str, "#elif", 5) == 0 ||
+				strncmp(preprocessor_directive->str, "#else", 5) == 0 ||
+				strncmp(preprocessor_directive->str, "#if", 3) == 0)
+			{
+				tok_pos+= line_str->len;
+				offset = 0;
+				continue;
+			}
 			if ((tok_pos - 1) > Deffunc[i].Def_fun_pos)
 			{
 				offset = (tok_pos + symbol_to_be_replaced->len);

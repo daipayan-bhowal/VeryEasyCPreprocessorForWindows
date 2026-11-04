@@ -49,6 +49,7 @@ string_t copy(string_t a);
 string_t getlines(string_t a);
 string_t overwrite(string_t a, string_t b);
 string_t getlineByPos(string_t a, int start_pos);
+string_t getWholeLineByPos(string_t a, int start_pos);
 
 int locate(string_t s, string_t find_str);
 int findString(string_t s, string_t find_str);
