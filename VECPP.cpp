@@ -2305,7 +2305,12 @@ bool_t IsEmptyLine(string_t strline)
 	}
 
 	if (i == strline->len - 1)
-		return True;
+	{
+		if (strline->str[i] == '\0')
+			return False;
+		else
+			return True;
+	}
 
 	
 	return False;
