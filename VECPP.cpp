@@ -1547,6 +1547,9 @@ void StringReplacer(string_t expandedFileContent, string_t OriginalFilecontent) 
 	{
 		string_t symbol_to_be_replaced = Defvar[i].Def_str;
 		string_t replace_str = Defvar[i].Rep_str;
+
+		if (symbol_to_be_replaced == NULL) // if no def var is present
+			return;
 		
 		while ((tok_pos = findStringPos(OriginalFilecontent, symbol_to_be_replaced, tok_pos)) != -1)
 		{
@@ -1584,6 +1587,9 @@ void StringReplacer(string_t expandedFileContent, string_t OriginalFilecontent) 
 	{
 		string_t symbol_to_be_replaced = Deffunc[i].Def_fun_str;
 		string_t replace_str = Deffunc[i].body;
+
+		if (symbol_to_be_replaced == NULL) // if no def func is present
+			return;
 
 		while ((tok_pos = findStringPos(OriginalFilecontent, symbol_to_be_replaced, tok_pos)) != -1)
 		{
@@ -2216,10 +2222,10 @@ void ReplacePredefinedMacros(string_t ExpandedHeaderSrcCode,string_t OriginalSrc
 {
 	string_t Predefined_List[5] = {string_const("__LINE__"), string_const("__FILE__"), string_const("__DATE__"), string_const("__TIME__"), string_const("__STDC__")};
 	int i = 0;
-	int tok_pos = 0;
+	int tok_pos = 0, offset = 0;
 	int fetch_line_no = 0;
 	char buff[32] = {'\0'};
-	string_t buff_str = NULL;
+	string_t buff_str = NULL, line_str = NULL;
 	time_t t = time(NULL);
 	struct tm* time_buf= (struct tm*)malloc(sizeof(struct tm));
 #ifdef _MSC_VER
@@ -2232,8 +2238,25 @@ void ReplacePredefinedMacros(string_t ExpandedHeaderSrcCode,string_t OriginalSrc
 	{
 		while ((tok_pos = findStringPos(OriginalSrcContent, Predefined_List[i], tok_pos)) != -1)
 		{
+			line_str = getWholeLineByPos(OriginalSrcContent, tok_pos);
+			string_t preprocessor_directive = tokenizeUsingOffset(line_str, &offset);
+			offset = 0;
+			if (strncmp(preprocessor_directive->str, "#define", 6) == 0 ||
+				strncmp(preprocessor_directive->str, "#if", 3) == 0 ||
+				strncmp(preprocessor_directive->str, "#ifdef", 6) == 0 ||
+				strncmp(preprocessor_directive->str, "#ifndef", 7) == 0 ||
+				strncmp(preprocessor_directive->str, "#endif", 6) == 0 ||
+				strncmp(preprocessor_directive->str, "#elif", 5) == 0 ||
+				strncmp(preprocessor_directive->str, "#else", 5) == 0 ||
+				strncmp(preprocessor_directive->str, "#if", 3) == 0)
+			{
+				tok_pos ++;
+				continue;
+			}
 			
 			delete_str(OriginalSrcContent, tok_pos, tok_pos + Predefined_List[i]->len - 1);
+			//setCommonChars(OriginalSrcContent, tok_pos, tok_pos + Predefined_List[i]->len - 1, ' ');
+			printf("For %d The original file content is:\n %s\n", i, OriginalSrcContent->str);
 
 			switch (i)
 			{
