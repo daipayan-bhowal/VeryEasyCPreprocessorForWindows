@@ -1568,6 +1568,8 @@ void StringReplacer(string_t expandedFileContent, string_t OriginalFilecontent) 
 				tok_pos+= line_str->len;
 				continue;
 			}
+			string_destroy(line_str);
+			string_destroy(preprocessor_directive);
 			if ((tok_pos - 1) > Defvar[i].def_pos)
 			{
 				delete_str(OriginalFilecontent, tok_pos-1, tok_pos + symbol_to_be_replaced->len-1);
@@ -1609,6 +1611,8 @@ void StringReplacer(string_t expandedFileContent, string_t OriginalFilecontent) 
 				offset = 0;
 				continue;
 			}
+			string_destroy(line_str);
+			string_destroy(preprocessor_directive);
 			if ((tok_pos - 1) > Deffunc[i].Def_fun_pos)
 			{
 				offset = (tok_pos + symbol_to_be_replaced->len);
@@ -2212,6 +2216,7 @@ void LineAndOptimizationProcessing(string_t OriginalSrcContent)
 			}
 
 		}
+		string_destroy(new_tok);
 		loc++;
 	}
 
@@ -2253,7 +2258,8 @@ void ReplacePredefinedMacros(string_t ExpandedHeaderSrcCode,string_t OriginalSrc
 				tok_pos ++;
 				continue;
 			}
-			
+			string_destroy(line_str);
+			string_destroy(preprocessor_directive);
 			delete_str(OriginalSrcContent, tok_pos, tok_pos + Predefined_List[i]->len - 1);
 			//setCommonChars(OriginalSrcContent, tok_pos, tok_pos + Predefined_List[i]->len - 1, ' ');
 			printf("For %d The original file content is:\n %s\n", i, OriginalSrcContent->str);
@@ -2269,22 +2275,28 @@ void ReplacePredefinedMacros(string_t ExpandedHeaderSrcCode,string_t OriginalSrc
 #endif
 					buff_str = string(buff);
 					insert_str(OriginalSrcContent, buff_str, tok_pos);
+					printf("For %d The inserted file content is:\n %s\n", i, OriginalSrcContent->str);
+					string_destroy(buff_str);
 				break;
 				case 1: // __FILE__
 				    insert_str(OriginalSrcContent, srcFile, tok_pos);
+					printf("For %d The inserted file content is:\n %s\n", i, OriginalSrcContent->str);
 				break;
 
 				case 2: // __DATE__
 					strftime(buff, sizeof buff, "%b %d %Y", time_buf);
 					buff_str = string(buff);
 					insert_str(OriginalSrcContent, buff_str, tok_pos);
-
+					printf("For %d The inserted file content is:\n %s\n", i, OriginalSrcContent->str);
+					string_destroy(buff_str);
 				break;
 
 				case 3: // __TIME__
 					strftime(buff, sizeof buff, "%H:%M:%S", time_buf);
 					buff_str = string(buff);
 					insert_str(OriginalSrcContent, buff_str, tok_pos);
+					printf("For %d The inserted file content is:\n %s\n", i, OriginalSrcContent->str);
+					string_destroy(buff_str);
 				break;
 
 				case 4:// __STDC__
@@ -2292,7 +2304,8 @@ void ReplacePredefinedMacros(string_t ExpandedHeaderSrcCode,string_t OriginalSrc
 					buff[1] = '\0';
 					buff_str = string(buff);
 					insert_str(OriginalSrcContent, buff_str, tok_pos);
-
+					printf("For %d The inserted file content is:\n %s\n", i, OriginalSrcContent->str);
+					string_destroy(buff_str);
 				break;
 			}
 
@@ -2301,7 +2314,7 @@ void ReplacePredefinedMacros(string_t ExpandedHeaderSrcCode,string_t OriginalSrc
 		tok_pos = 0;
 
 	}
-
+	free(time_buf);
 }
 
 
@@ -2681,7 +2694,7 @@ void parser(string_t expandedsrcfilecontent, string_t OriginalFilecontent, strin
 	// Order of calling the macro functions
 	FillAndEvaluateAllSingleHashIfBlocks(expandedsrcfilecontent); // only the nonmacro content is required as input
 	StringReplacer(expandedsrcfilecontent, OriginalFilecontent); // input the concatanated header and clang content
-	OriginalSourceFileProcessing(OriginalFilecontent);
+	//OriginalSourceFileProcessing(OriginalFilecontent);
 	LineAndOptimizationProcessing(OriginalFilecontent);
 	//ReplacePredefinedMacros(expandedsrcfilecontent, OriginalFilecontent, srcFile);
 	RemoveAllPreprocessorDirectives(expandedsrcfilecontent);
