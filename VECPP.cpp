@@ -2402,18 +2402,25 @@ void RemoveAllPreprocessorDirectives(string_t newExpandedSrcCode)
 			)
 		{
 			string_t headerfile = tokenizeFullWord(newExpandedSrcCode, &tokenOffset);
-			delete_str(newExpandedSrcCode, loc, tokenOffset);
+			setCommonChars(newExpandedSrcCode, loc, tokenOffset, ' ');
+			loc = tokenOffset;
 
 		}
 		else if (compare_cstr(new_tok, "define") == 0)
 		{
 			string_t Defstr = tokenizeUsingOffset(newExpandedSrcCode, &tokenOffset);
 			string_t Repstr = getlineByPos(newExpandedSrcCode, tokenOffset);
-			if(Repstr != NULL)
-			    delete_str(newExpandedSrcCode, loc, tokenOffset + Repstr->len-1);
+			if (Repstr != NULL)
+			{
+				setCommonChars(newExpandedSrcCode, loc, tokenOffset + Repstr->len - 1, ' ');
+				loc = tokenOffset + Repstr->len - 1;
+			}
 			else
-				delete_str(newExpandedSrcCode, loc, tokenOffset);
-
+			{
+				setCommonChars(newExpandedSrcCode, loc, tokenOffset, ' ');
+				loc = tokenOffset;
+			}
+			
 		}
 		else if (compare_cstr(new_tok, "if") == 0 || 
 			     compare_cstr(new_tok, "ifdef") == 0 || 
@@ -2421,14 +2428,15 @@ void RemoveAllPreprocessorDirectives(string_t newExpandedSrcCode)
 			     compare_cstr(new_tok, "elif") == 0)
 		{
 			string_t conditionalvar = tokenizeUsingOffset(newExpandedSrcCode, &tokenOffset);
-			delete_str(newExpandedSrcCode, loc, tokenOffset);
+			setCommonChars(newExpandedSrcCode, loc, loc+ tokenOffset, ' ');
+			loc = tokenOffset;
 
 		}
 		else if (compare_cstr(new_tok, "endif") == 0)
 		{
-			delete_str(newExpandedSrcCode, loc, tokenOffset);
+			setCommonChars(newExpandedSrcCode, loc, loc + tokenOffset, ' ');
+			loc = tokenOffset;
 		}
-		loc++;
 	}
 
 
@@ -2696,7 +2704,7 @@ void parser(string_t expandedsrcfilecontent, string_t OriginalFilecontent, strin
 	StringReplacer(expandedsrcfilecontent, OriginalFilecontent); // input the concatanated header and clang content
 	//OriginalSourceFileProcessing(OriginalFilecontent);
 	LineAndOptimizationProcessing(OriginalFilecontent);
-	//ReplacePredefinedMacros(expandedsrcfilecontent, OriginalFilecontent, srcFile);
+	ReplacePredefinedMacros(expandedsrcfilecontent, OriginalFilecontent, srcFile);
 	RemoveAllPreprocessorDirectives(expandedsrcfilecontent);
 	RemoveAllPreprocessorDirectives(OriginalFilecontent);
 	RemoveAllExtraEmptyLines(expandedsrcfilecontent);
