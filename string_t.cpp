@@ -147,7 +147,8 @@ int findCharNext(string_t a,char c, int *pos)
 		}
 
 	}
-	return -1;
+	*pos = -1;
+	return *pos;
 
 }
 
@@ -233,13 +234,30 @@ string_t getlineByPos(string_t a, int start_pos)
 	int i,j,k= 0;
 	//string_t ret = NULL;
 	char* s = NULL;
+	int quotation_start = -1;
+	int quotation_end = -1;
+	int counter = 0;
 	while (a->str[k + start_pos] != '\n' && a->str[k + start_pos] != '\0' && a->str[k + start_pos] != EOF)
 	{
+		if (a->str[k + start_pos] == '\"' && counter == 0)
+		{
+			quotation_start = k + start_pos;
+			counter++;
+		}
+		if (a->str[k + start_pos] == '\"' && counter == 1)
+		{
+			quotation_end = k + start_pos;
+			counter= 0;
+		}
 		  k++;
 	}
 	if (k == 1 && (a->str[k + start_pos- 1] == '\t' || a->str[k + start_pos- 1] == '\v' || a->str[k + start_pos-1] == '\r'))
 	{
 		return NULL;
+	}
+	if (quotation_start != -1 && quotation_end != -1 && quotation_start < (k + start_pos) && (k + start_pos) < quotation_end)
+	{
+		k = quotation_end - start_pos + 1;	
 	}
 	s = (char*)calloc(k + 1, sizeof(char));
 	if (a->str[k + start_pos] == '\n' || a->str[k + start_pos] == '\0' || a->str[k + start_pos] == EOF)

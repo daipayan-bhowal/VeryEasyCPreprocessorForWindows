@@ -2392,9 +2392,10 @@ void RemoveAllPreprocessorDirectives(string_t newExpandedSrcCode)
 {
 	int loc = 0;
 	int tokenOffset = 0;
+	int prev_loc = -1;
 	while ((loc = findCharNext(newExpandedSrcCode, '#', &loc)) != -1)
 	{
-		tokenOffset = loc+1;
+		tokenOffset = loc + 1;
 		string_t new_tok = tokenizeUsingOffset(newExpandedSrcCode, &tokenOffset);
 		if (compare_cstr(new_tok, "include") == 0 ||
 			compare_cstr(new_tok, "error") == 0 ||
@@ -2408,7 +2409,27 @@ void RemoveAllPreprocessorDirectives(string_t newExpandedSrcCode)
 		}
 		else if (compare_cstr(new_tok, "define") == 0)
 		{
-			string_t Defstr = tokenizeUsingOffset(newExpandedSrcCode, &tokenOffset);
+
+			//string_t line_str = getWholeLineByPos(newExpandedSrcCode, tokenOffset);
+			//setCommonChars(newExpandedSrcCode, loc, loc + line_str->len, ' ');
+		    string_t Defstr = tokenizeUsingOffset(newExpandedSrcCode, &tokenOffset);
+			printf("char after Defstr is: %c\n" , newExpandedSrcCode->str[tokenOffset]);
+			if (newExpandedSrcCode->str[tokenOffset] == '(')
+			{
+				tokenOffset++;
+				if (newExpandedSrcCode->str[tokenOffset] == ')')
+				{
+					tokenOffset++;
+				}
+				else
+				{
+					string_t args_str = tokenizeUsingOffset(newExpandedSrcCode, &tokenOffset);
+					while (compare_cstr(args_str, ")") != 0)
+					{
+						args_str = tokenizeUsingOffset(newExpandedSrcCode, &tokenOffset);
+					}
+				}
+			}
 			string_t Repstr = getlineByPos(newExpandedSrcCode, tokenOffset);
 			if (Repstr != NULL)
 			{
@@ -2428,14 +2449,18 @@ void RemoveAllPreprocessorDirectives(string_t newExpandedSrcCode)
 			     compare_cstr(new_tok, "elif") == 0)
 		{
 			string_t conditionalvar = tokenizeUsingOffset(newExpandedSrcCode, &tokenOffset);
-			setCommonChars(newExpandedSrcCode, loc, loc+ tokenOffset, ' ');
+			setCommonChars(newExpandedSrcCode, loc, tokenOffset, ' ');
 			loc = tokenOffset;
 
 		}
 		else if (compare_cstr(new_tok, "endif") == 0)
 		{
-			setCommonChars(newExpandedSrcCode, loc, loc + tokenOffset, ' ');
+			setCommonChars(newExpandedSrcCode, loc, tokenOffset, ' ');
 			loc = tokenOffset;
+		}
+		else
+		{
+			loc++;
 		}
 	}
 
