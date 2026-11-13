@@ -2340,11 +2340,11 @@ bool_t IsEmptyLine(string_t strline)
 		i++;
 	}
 
+	if (strline->str[0] == '\0')
+		return False;
+
 	if (i == strline->len - 1)
 	{
-		if (strline->str[i] == '\0')
-			return False;
-		else
 			return True;
 	}
 
@@ -2448,8 +2448,8 @@ void RemoveAllPreprocessorDirectives(string_t newExpandedSrcCode)
 			     compare_cstr(new_tok, "undef") == 0 ||
 			     compare_cstr(new_tok, "elif") == 0)
 		{
-			string_t conditionalvar = tokenizeUsingOffset(newExpandedSrcCode, &tokenOffset);
-			setCommonChars(newExpandedSrcCode, loc, tokenOffset, ' ');
+			string_t conditionalvar = getlineByPos(newExpandedSrcCode, tokenOffset);
+			setCommonChars(newExpandedSrcCode, loc, tokenOffset + conditionalvar->len - 1, ' ');
 			loc = tokenOffset;
 
 		}
